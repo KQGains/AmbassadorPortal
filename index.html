@@ -1,0 +1,139 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+
+    <style>
+        body {
+            font-family: 'GAOEL', sans-serif; /* Apply GAOEL font to the body */
+            background-color: #f4f4f9;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 400px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        h2 {
+            text-align: center;
+            color: #333;
+        }
+
+        .input-field {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-family: 'GAOEL', sans-serif; /* Apply GAOEL font to input fields (edit boxes) */
+        }
+
+        .button {
+            width: 100%;
+            padding: 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-family: 'GAOEL', sans-serif; /* Apply GAOEL font to the button */
+            font-size: 16px;
+        }
+
+            .button:hover {
+                background-color: #45a049;
+            }
+
+        .footer {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+            .footer a {
+                text-decoration: none;
+                color: #4CAF50;
+            }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Login</h2>
+
+        <form id="loginForm">
+            <input type="email" id="email" class="input-field" placeholder="Enter your email" required>
+            <input type="password" id="password" class="input-field" placeholder="Enter your password" required>
+            <button type="submit" class="button">Login</button>
+        </form>
+
+        <div class="footer">
+            <p>Don't have an account? <a href="signup.html">Sign up</a></p>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
+        import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
+
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyDrma-l3tN09ndI6Ev2Kb95ooV7PmoRfgg",
+            authDomain: "kq-gains-portal-5a1f3.firebaseapp.com",
+            projectId: "kq-gains-portal-5a1f3",
+            storageBucket: "kq-gains-portal-5a1f3.firebasestorage.app",
+            messagingSenderId: "430222102518",
+            appId: "1:430222102518:web:a075a771080a55dc9141d7"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth();
+        const db = getFirestore();
+
+        // Handle login form submission
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault(); // Prevent default form submission
+
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            try {
+                // Sign in the user with Firebase Authentication
+                const userCredential = await signInWithEmailAndPassword(auth, email, password);
+                const user = userCredential.user;
+                console.log("Logged in as:", user.email);
+
+                // After successful login, fetch user data
+                const userRef = doc(db, "users", user.uid);
+                const userDoc = await getDoc(userRef);
+
+                if (userDoc.exists()) {
+                    const userData = userDoc.data();
+                    console.log("User data:", userData);
+
+                    // Redirect based on account type
+                    if (userData.accountType === 'Admin') {
+                        window.location.href = 'admin.html';  // Redirect to admin page
+                    } else if (userData.accountType === 'Ambassador') {
+                        window.location.href = 'Portal.html';  // Redirect to ambassador portal
+                    } else {
+                        alert("Unknown account type.");
+                    }
+                } else {
+                    alert("No user data found.");
+                }
+            } catch (error) {
+                console.error("Error signing in:", error.message);
+                alert("Invalid credentials, please try again.");
+            }
+        });
+    </script>
+</body>
+</html>

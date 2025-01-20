@@ -1,0 +1,308 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel</title>
+    <style>
+        body {
+            font-family: Gaoel, sans-serif;
+            background-color: #f4f7f6;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        h2 {
+            text-align: center;
+            margin-top: 20px;
+            color: #000;
+        }
+
+        table {
+            width: 80%;
+            margin: 20px auto;
+            border-collapse: collapse;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        table, th, td {
+            border: 1px solid #ccc;
+            text-align: left;
+            padding: 12px;
+        }
+
+        th {
+            background-color: #000;
+            color: white;
+        }
+
+        td {
+            background-color: #f9f9f9;
+        }
+
+        .dropdown-container {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+            .dropdown-container select {
+                padding: 10px;
+                font-size: 16px;
+                cursor: pointer;
+            }
+
+        .form-container {
+            width: 80%;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+            .form-container label {
+                font-size: 16px;
+                margin-right: 10px;
+            }
+
+            .form-container button {
+                padding: 10px 15px;
+                margin: 5px;
+                background-color: #000;
+                color: white;
+                border: none;
+                border-radius: 5px;
+                cursor: pointer;
+            }
+
+                .form-container button:hover {
+                    background-color: #333;
+                }
+    </style>
+</head>
+<body>
+    <h2>Admin Dashboard</h2>
+
+    <table id="adminTable">
+        <thead>
+            <tr>
+                <th>First Name</th>
+                <th>Posts</th>
+                <th>Storys</th>
+                <th>Reels</th>
+                <th>Collabs</th>
+                <th>Sales</th>
+                <th>Points Used</th>
+                <th>Total Points</th>
+            </tr>
+        </thead>
+        <tbody id="adminInfo">
+            <!-- Data from Firebase will be inserted here -->
+        </tbody>
+    </table>
+
+    <!-- Dropdown for selecting ambassador -->
+    <div class="dropdown-container">
+        <label for="ambassadorSelect">Select Ambassador: </label>
+        <select id="ambassadorSelect">
+            <option value="">Select a user</option>
+            <!-- Options will be populated dynamically -->
+        </select>
+    </div>
+
+    <!-- Ambassador Edit Form -->
+    <div class="form-container" id="ambassadorForm" style="display:none;">
+        <h3>Edit Ambassador Data</h3>
+
+        <div>
+            <label>Posts</label>
+            <button id="incrementPosts">+</button>
+            <span id="postsValue">0</span>
+        </div>
+
+        <div>
+            <label>Storys</label>
+            <button id="incrementStorys">+</button>
+            <span id="storysValue">0</span>
+        </div>
+
+        <div>
+            <label>Reels</label>
+            <button id="incrementReels">+</button>
+            <span id="reelsValue">0</span>
+        </div>
+
+        <div>
+            <label>Collabs</label>
+            <button id="incrementCollabs">+</button>
+            <span id="collabsValue">0</span>
+        </div>
+
+        <div>
+            <label>Sales</label>
+            <button id="incrementSales">+</button>
+            <span id="salesValue">0</span>
+        </div>
+
+        <div>
+            <label>Points Used</label>
+            <button id="incrementPointsUsed">+</button>
+            <span id="pointsUsedValue">0</span>
+        </div>
+
+        <button id="saveButton">Save Changes</button>
+    </div>
+
+    <script type="module">
+        // Firebase SDK imports
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signOut, setPersistence, browserSessionPersistence } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
+        import { getFirestore, collection, getDocs, doc, updateDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
+
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyDrma-l3tN09ndI6Ev2Kb95ooV7PmoRfgg",
+            authDomain: "kq-gains-portal-5a1f3.firebaseapp.com",
+            projectId: "kq-gains-portal-5a1f3",
+            storageBucket: "kq-gains-portal-5a1f3.firebasestorage.app",
+            messagingSenderId: "430222102518",
+            appId: "1:430222102518:web:a075a771080a55dc9141d7"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth();
+        const db = getFirestore();
+
+        // Set session persistence
+        setPersistence(auth, browserSessionPersistence).catch((error) => {
+            console.error("Error setting session persistence:", error);
+        });
+
+        // Inactivity timer (1 minute)
+        let inactivityTimeout;
+        const INACTIVITY_LIMIT = 60000; // 1 minute
+
+        // Reset inactivity timer on any user interaction
+        window.addEventListener('mousemove', resetInactivityTimer);
+        window.addEventListener('keydown', resetInactivityTimer);
+
+        // Start inactivity timer
+        function resetInactivityTimer() {
+            clearTimeout(inactivityTimeout);
+            inactivityTimeout = setTimeout(logout, INACTIVITY_LIMIT); // Log out after 1 minute of inactivity
+        }
+
+        // Check if user is logged in
+        onAuthStateChanged(auth, async (user) => {
+            if (!user) {
+                // Redirect to login page if user is not authenticated
+                window.location.href = 'index.html';
+                return;
+            }
+
+            // User is logged in, fetch user data for all ambassadors from the "users" collection
+            const querySnapshot = await getDocs(collection(db, "users"));
+            const userInfo = document.getElementById("adminInfo");
+            const ambassadorSelect = document.getElementById("ambassadorSelect");
+
+            querySnapshot.forEach((doc) => {
+                const userData = doc.data();
+                const posts = userData.Posts || 0;
+                const storys = userData.Storys || 0;
+                const reels = userData.Reels || 0;
+                const collabs = userData.Collabs || 0;
+                const sales = userData.Sales || 0;  // New Sales field
+                const pointsUsed = userData.PointsUsed || 0;
+                const totalPoints = posts + storys + reels + collabs + sales - pointsUsed;
+
+                // Insert data into the table
+                const row = document.createElement('tr');
+                row.setAttribute("data-id", doc.id);  // Store the document ID for editing later
+                row.innerHTML = `
+                            <td>${userData.firstName}</td>
+                            <td>${posts}</td>
+                            <td>${storys}</td>
+                            <td>${reels}</td>
+                            <td>${collabs}</td>
+                            <td>${sales}</td> <!-- Display Sales -->
+                            <td>${pointsUsed}</td>
+                            <td>${totalPoints}</td>
+                        `;
+                userInfo.appendChild(row);
+
+                // Add the ambassador to the select dropdown
+                const option = document.createElement("option");
+                option.value = doc.id;
+                option.textContent = userData.firstName;
+                ambassadorSelect.appendChild(option);
+            });
+
+            // Set up event listener for ambassador selection
+            ambassadorSelect.addEventListener("change", (event) => {
+                const selectedUserId = event.target.value;
+                if (selectedUserId) {
+                    const selectedUserDoc = querySnapshot.docs.find(doc => doc.id === selectedUserId);
+                    const selectedUserData = selectedUserDoc.data();
+
+                    // Display the current data in the form
+                    document.getElementById("postsValue").textContent = selectedUserData.Posts || 0;
+                    document.getElementById("storysValue").textContent = selectedUserData.Storys || 0;
+                    document.getElementById("reelsValue").textContent = selectedUserData.Reels || 0;
+                    document.getElementById("collabsValue").textContent = selectedUserData.Collabs || 0;
+                    document.getElementById("salesValue").textContent = selectedUserData.Sales || 0;  // Show sales value
+                    document.getElementById("pointsUsedValue").textContent = selectedUserData.PointsUsed || 0;
+
+                    // Show the form
+                    document.getElementById("ambassadorForm").style.display = "block";
+
+                    // Increment handlers only (no decrement)
+                    document.getElementById("incrementPosts").onclick = () => {
+                        document.getElementById("postsValue").textContent = parseInt(document.getElementById("postsValue").textContent) + 1;
+                    };
+
+                    document.getElementById("incrementStorys").onclick = () => {
+                        document.getElementById("storysValue").textContent = parseInt(document.getElementById("storysValue").textContent) + 1;
+                    };
+
+                    document.getElementById("incrementReels").onclick = () => {
+                        document.getElementById("reelsValue").textContent = parseInt(document.getElementById("reelsValue").textContent) + 1;
+                    };
+
+                    document.getElementById("incrementCollabs").onclick = () => {
+                        document.getElementById("collabsValue").textContent = parseInt(document.getElementById("collabsValue").textContent) + 1;
+                    };
+
+                    document.getElementById("incrementSales").onclick = () => {
+                        document.getElementById("salesValue").textContent = parseInt(document.getElementById("salesValue").textContent) + 1;
+                    };
+
+                    document.getElementById("incrementPointsUsed").onclick = () => {
+                        document.getElementById("pointsUsedValue").textContent = parseInt(document.getElementById("pointsUsedValue").textContent) + 1;
+                    };
+
+                    // Save updated data to Firestore
+                    document.getElementById("saveButton").onclick = async () => {
+                        const updatedData = {
+                            Posts: parseInt(document.getElementById("postsValue").textContent),
+                            Storys: parseInt(document.getElementById("storysValue").textContent),
+                            Reels: parseInt(document.getElementById("reelsValue").textContent),
+                            Collabs: parseInt(document.getElementById("collabsValue").textContent),
+                            Sales: parseInt(document.getElementById("salesValue").textContent),
+                            PointsUsed: parseInt(document.getElementById("pointsUsedValue").textContent)
+                        };
+
+                        await updateDoc(doc(db, "users", selectedUserId), updatedData);
+                        alert("Data updated successfully!");
+                    };
+                }
+            });
+        });
+    </script>
+</body>
+</html>
