@@ -3,86 +3,186 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login</title>
-
+    <title>User Portal</title>
     <style>
         body {
-            font-family: 'GAOEL', sans-serif; /* Apply GAOEL font to the body */
-            background-color: #f4f4f9;
-            padding: 20px;
-        }
-
-        .container {
-            max-width: 400px;
-            margin: 0 auto;
-            background-color: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            font-family: 'GAOL', sans-serif;
+            background-color: #f4f7f6;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
 
         h2 {
             text-align: center;
-            color: #333;
-        }
-
-        .input-field {
-            width: 100%;
-            padding: 10px;
-            margin: 10px 0;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            font-family: 'GAOEL', sans-serif; /* Apply GAOEL font to input fields (edit boxes) */
-        }
-
-        .button {
-            width: 100%;
-            padding: 10px;
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-family: 'GAOEL', sans-serif; /* Apply GAOEL font to the button */
-            font-size: 16px;
-        }
-
-            .button:hover {
-                background-color: #45a049;
-            }
-
-        .footer {
-            text-align: center;
             margin-top: 20px;
+            color: #000;
+            font-size: 24px;
         }
 
-            .footer a {
-                text-decoration: none;
-                color: #4CAF50;
+        table {
+            width: 80%;
+            margin: 20px auto;
+            border-collapse: collapse;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        table, th, td {
+            border: 1px solid #ccc;
+            text-align: left;
+            padding: 12px;
+        }
+
+        th {
+            background-color: #000;
+            color: white;
+        }
+
+        td {
+            background-color: #f9f9f9;
+        }
+
+        .logoutButton {
+            padding: 12px 20px;
+            background-color: #000;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            display: block;
+            margin: 20px auto;
+            width: 200px;
+        }
+
+            .logoutButton:hover {
+                background-color: #333;
             }
+
+        .pointsTable {
+            margin-top: 20px;
+            width: 80%;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+            .pointsTable th, .pointsTable td {
+                text-align: left;
+                padding: 8px;
+            }
+
+            .pointsTable td {
+                padding-left: 20px;
+            }
+
+            .pointsTable th {
+                background-color: #ddd;
+            }
+
+        /* Mobile Optimization */
+        @media only screen and (max-width: 768px) {
+            /* Adjusting tables for mobile view */
+            table {
+                width: 100%;
+                margin: 10px 0;
+            }
+
+            table, th, td {
+                font-size: 14px;
+                padding: 8px;
+            }
+
+            .logoutButton {
+                font-size: 14px;
+                padding: 10px 16px;
+                width: 180px;
+            }
+
+            h2 {
+                font-size: 22px;
+            }
+
+            .pointsTable {
+                width: 90%;
+            }
+        }
+
+        @media only screen and (max-width: 480px) {
+            /* Further optimize for smaller screens */
+            table, th, td {
+                font-size: 12px;
+                padding: 6px;
+            }
+
+            .logoutButton {
+                font-size: 12px;
+                padding: 8px 14px;
+                width: 160px;
+            }
+
+            h2 {
+                font-size: 20px;
+            }
+
+            .pointsTable {
+                width: 100%;
+            }
+
+                .pointsTable th, .pointsTable td {
+                    font-size: 12px;
+                    padding: 6px;
+                }
+        }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h2>Login</h2>
+    <h2>User Portal</h2>
 
-        <form id="loginForm">
-            <input type="email" id="email" class="input-field" placeholder="Enter your email" required>
-            <input type="password" id="password" class="input-field" placeholder="Enter your password" required>
-            <button type="submit" class="button">Login</button>
-        </form>
+    <table id="userTable">
+        <thead>
+            <tr>
+                <th>First Name</th>
+                <th>Posts</th>
+                <th>Storys</th>
+                <th>Reels</th>
+                <th>Collabs</th>
+                <th>Sales (ZAR)</th>
+                <th>Points Used</th>
+                <th>Total Points</th>
+                <th>Points Value</th>
+            </tr>
+        </thead>
+        <tbody id="userInfo">
+            <!-- Dynamic user data will be inserted here -->
+        </tbody>
+    </table>
 
-        <div class="footer">
-            <p>Don't have an account? <a href="signup.html">Sign up</a></p>
-        </div>
+    <div class="pointsTable">
+        <h3>Points per Event</h3>
+        <table id="pointsTable">
+            <thead>
+                <tr>
+                    <th>Activity</th>
+                    <th>Points per Event</th>
+                </tr>
+            </thead>
+            <tbody id="pointsInfo">
+                <!-- Points multipliers will be inserted here -->
+            </tbody>
+        </table>
     </div>
 
+    <button class="logoutButton" onclick="logout()">Logout</button>
+
     <script type="module">
+        // Firebase configuration
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
-        import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
+        import { getAuth, onAuthStateChanged, signOut, setPersistence, browserSessionPersistence } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
         import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 
-        // Firebase configuration
         const firebaseConfig = {
             apiKey: "AIzaSyDrma-l3tN09ndI6Ev2Kb95ooV7PmoRfgg",
             authDomain: "kq-gains-portal-5a1f3.firebaseapp.com",
@@ -92,48 +192,123 @@
             appId: "1:430222102518:web:a075a771080a55dc9141d7"
         };
 
-        // Initialize Firebase
         const app = initializeApp(firebaseConfig);
         const auth = getAuth();
         const db = getFirestore();
 
-        // Handle login form submission
-        document.getElementById('loginForm').addEventListener('submit', async (e) => {
-            e.preventDefault(); // Prevent default form submission
-
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-
-            try {
-                // Sign in the user with Firebase Authentication
-                const userCredential = await signInWithEmailAndPassword(auth, email, password);
-                const user = userCredential.user;
-                console.log("Logged in as:", user.email);
-
-                // After successful login, fetch user data
-                const userRef = doc(db, "users", user.uid);
-                const userDoc = await getDoc(userRef);
-
-                if (userDoc.exists()) {
-                    const userData = userDoc.data();
-                    console.log("User data:", userData);
-
-                    // Redirect based on account type
-                    if (userData.accountType === 'Admin') {
-                        window.location.href = 'admin.html';  // Redirect to admin page
-                    } else if (userData.accountType === 'Ambassador') {
-                        window.location.href = 'Portal.html';  // Redirect to ambassador portal
-                    } else {
-                        alert("Unknown account type.");
-                    }
-                } else {
-                    alert("No user data found.");
-                }
-            } catch (error) {
-                console.error("Error signing in:", error.message);
-                alert("Invalid credentials, please try again.");
-            }
+        // Set session persistence to keep users logged in until session expires
+        setPersistence(auth, browserSessionPersistence).catch((error) => {
+            console.error("Error setting session persistence:", error);
         });
+
+        // Inactivity timer setup (1 minute)
+        let inactivityTimeout;
+        const INACTIVITY_LIMIT = 60000; // 1 minute
+
+        // Reset inactivity timer on any user interaction
+        window.addEventListener('mousemove', resetInactivityTimer);
+        window.addEventListener('keydown', resetInactivityTimer);
+
+        // Start inactivity timer
+        function resetInactivityTimer() {
+            clearTimeout(inactivityTimeout);
+            inactivityTimeout = setTimeout(logout, INACTIVITY_LIMIT); // Log out after 1 minute of inactivity
+        }
+
+        // Redirect user if not authenticated
+        onAuthStateChanged(auth, (user) => {
+            if (!user) {
+                // Redirect to the login page if the user is not logged in
+                window.location.href = 'index.html';
+                return;
+            }
+
+            // User is logged in, load their data
+            loadUserData(user);
+        });
+
+        // Load user data from Firestore
+        async function loadUserData(user) {
+            const userDocRef = doc(db, "users", user.uid);
+            const userDocSnap = await getDoc(userDocRef);
+
+            if (userDocSnap.exists()) {
+                const userData = userDocSnap.data();
+                displayUserData(userData);
+            } else {
+                console.log("No such document!");
+            }
+        }
+
+        // Display user data in the table
+        function displayUserData(userData) {
+            // Apply the points for each type (updated multipliers)
+            const posts = (userData.Posts || 0) * 6;        // Posts = 6 Points
+            const storys = (userData.Storys || 0) * 3;      // Storys = 3 Points
+            const reels = (userData.Reels || 0) * 9;        // Reels = 9 Points
+            const collabs = (userData.Collabs || 0) * 12;   // Collabs = 12 Points
+            const pointsUsed = userData.PointsUsed || 0;
+            const sales = userData.Sales || 0;
+
+            // Total points including sales calculation (1 point per 100 ZAR)
+            const salesPoints = Math.floor(sales / 100);
+
+            // Total points calculation
+            const totalPoints = posts + storys + reels + collabs + salesPoints - pointsUsed;
+            const pointsValue = (totalPoints * 4).toFixed(2); // Points value in ZAR
+            const pointsValueZAR = `R ${pointsValue}`;
+            const salesValueZAR = `R ${(sales).toFixed(2)}`;
+
+            // Display user info table
+            const userInfo = document.getElementById('userInfo');
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                        <td>${userData.firstName}</td>
+                        <td>${userData.Posts || 0}</td>
+                        <td>${userData.Storys || 0}</td>
+                        <td>${userData.Reels || 0}</td>
+                        <td>${userData.Collabs || 0}</td>
+                        <td>${salesValueZAR}</td>
+                        <td>${pointsUsed}</td>
+                        <td>${totalPoints}</td>
+                        <td>${pointsValueZAR}</td>
+                    `;
+            userInfo.appendChild(row);
+
+            // Display points per event (multipliers)
+            const pointsInfo = document.getElementById('pointsInfo');
+            pointsInfo.innerHTML = `
+                        <tr>
+                            <td>Posts</td>
+                            <td>6</td>
+                        </tr>
+                        <tr>
+                            <td>Storys</td>
+                            <td>3</td>
+                        </tr>
+                        <tr>
+                            <td>Reels</td>
+                            <td>9</td>
+                        </tr>
+                        <tr>
+                            <td>Collabs</td>
+                            <td>12</td>
+                        </tr>
+                        <tr>
+                            <td>Sales</td>
+                            <td>1 point per 100 ZAR</td>
+                        </tr>
+                    `;
+        }
+
+        // Logout function
+        function logout() {
+            signOut(auth).then(() => {
+                window.location.href = 'index.html'; // Redirect to index.html after logout
+            }).catch((error) => {
+                console.error("Error signing out: ", error);
+            });
+        }
     </script>
 </body>
 </html>
