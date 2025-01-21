@@ -1,14 +1,12 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sign Up</title>
-
     <style>
-        /* Apply GAOEL font to all text */
         body {
-            font-family: 'GAOEL', sans-serif; /* This will apply 'GAOEL' font to all text */
+            font-family: 'GAOEL', sans-serif;
             background-color: #f4f7f6;
             color: #333;
             margin: 0;
@@ -16,7 +14,6 @@
             box-sizing: border-box;
         }
 
-        /* Container for the form */
         .container {
             max-width: 400px;
             margin: 50px auto;
@@ -37,16 +34,13 @@
             flex-direction: column;
         }
 
-        /* Style input fields and ensure the font is GAOEL */
         input {
             padding: 12px;
             margin: 10px 0;
             border: 1px solid #ccc;
             border-radius: 5px;
-            font-family: 'GAOEL', sans-serif; /* Apply GAOEL font to input fields */
         }
 
-        /* Style the button and apply GAOEL font */
         button {
             padding: 12px;
             background-color: #000;
@@ -54,24 +48,30 @@
             border: none;
             border-radius: 5px;
             cursor: pointer;
-            font-family: 'GAOEL', sans-serif; /* Apply GAOEL font to button */
         }
 
-            button:hover {
-                background-color: #333;
-            }
+        button:hover {
+            background-color: #333;
+        }
+
+        .error {
+            color: red;
+            font-size: 14px;
+            margin-top: -8px;
+            margin-bottom: 10px;
+        }
     </style>
 </head>
 <body>
-
     <div class="container">
         <h2>Create Account</h2>
         <form id="signupForm">
-            <input type="text" id="firstName" placeholder="First Name" required><br>
-            <input type="text" id="lastName" placeholder="Last Name" required><br>
-            <input type="email" id="email" placeholder="Email" required><br>
-            <input type="password" id="password" placeholder="Password" required><br>
-            <!-- No sales input, this will be handled programmatically -->
+            <input type="text" id="firstName" placeholder="First Name" required>
+            <input type="text" id="lastName" placeholder="Last Name" required>
+            <input type="email" id="email" placeholder="Email" required>
+            <input type="password" id="password" placeholder="Password" required>
+            <input type="password" id="confirmPassword" placeholder="Confirm Password" required>
+            <p id="errorMessage" class="error"></p>
             <button type="submit">Sign Up</button>
         </form>
     </div>
@@ -81,7 +81,6 @@
         import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
         import { getFirestore, setDoc, doc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 
-        // Firebase Configuration
         const firebaseConfig = {
             apiKey: "AIzaSyDrma-l3tN09ndI6Ev2Kb95ooV7PmoRfgg",
             authDomain: "kq-gains-portal-5a1f3.firebaseapp.com",
@@ -91,12 +90,10 @@
             appId: "1:430222102518:web:a075a771080a55dc9141d7"
         };
 
-        // Initialize Firebase
         const app = initializeApp(firebaseConfig);
         const auth = getAuth();
         const db = getFirestore();
 
-        // Sign Up Form Submission
         document.getElementById('signupForm').addEventListener('submit', async (event) => {
             event.preventDefault();
 
@@ -104,38 +101,43 @@
             const lastName = document.getElementById('lastName').value;
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            const errorMessage = document.getElementById('errorMessage');
 
-            // Set sales value programmatically (for example, starting at 0)
-            const sales = 0;  // Set this to any default value or calculation you prefer
+            // Clear previous error message
+            errorMessage.textContent = '';
+
+            // Validate password match
+            if (password !== confirmPassword) {
+                errorMessage.textContent = "Passwords do not match. Please try again.";
+                return;
+            }
 
             try {
                 const userCredential = await createUserWithEmailAndPassword(auth, email, password);
                 const user = userCredential.user;
 
-                // Automatically set account type to "Ambassador"
                 const accountType = "Ambassador";
 
-                // Save user data to Firestore, including the sales value
                 await setDoc(doc(db, "users", user.uid), {
-                    firstName: firstName,
-                    lastName: lastName,
-                    email: email,
-                    accountType: accountType,
+                    firstName,
+                    lastName,
+                    email,
+                    accountType,
                     Posts: 0,
                     Storys: 0,
                     Reels: 0,
                     Collabs: 0,
-                    Sales: sales, // Sales is now set programmatically
+                    Sales: 0,
                     TotalPoints: 0,
                     PointsUsed: 0,
                 });
 
-                // Redirect to index.html after successful account creation
                 alert("Account created successfully! Redirecting to login...");
                 window.location.href = 'index.html';
             } catch (error) {
                 console.error(error.message);
-                alert("Error creating account: " + error.message);
+                errorMessage.textContent = "Error creating account: " + error.message;
             }
         });
     </script>
